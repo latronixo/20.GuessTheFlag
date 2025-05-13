@@ -10,12 +10,13 @@ import SwiftUI
 struct ContentView: View {
     var body: some View {
         HStack {
-            Color.secondary
+            Color(red: 1, green: 0.8, blue: 0)
                 .frame(minWidth: 200, maxHeight: 200)
             Text("Hello, world!")
             Text("This is another text view")
         }
-        .background(.red)
+        .background(.blue)
+        .ignoresSafeArea()
     }
 }
 
