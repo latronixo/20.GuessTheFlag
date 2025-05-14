@@ -9,20 +9,21 @@ import SwiftUI
 
 struct ContentView: View {
     var body: some View {
-        ZStack {
-            VStack(spacing: 0) {
-                Color.red
-                Color.blue
-            }
-            Text("Hello, world!")
-                .foregroundStyle(.secondary)
-                .padding(50)
-                .background(.ultraThinMaterial)
-        }
-        .ignoresSafeArea()
+        Circle()
+            .fill(
+                AngularGradient(
+                    gradient: Gradient(colors: [.red, .yellow, .green, .blue, .purple, .red]),
+                    center: .center,
+                    startAngle: .degrees(0), // Начальный угол
+                    endAngle: .degrees(360) // Конечный угол (полный круг)
+                )
+            )
+            .rotationEffect(.degrees(90)) // Поворот всего Circle
+            .frame(width: 300, height: 500)
     }
 }
 
 #Preview {
     ContentView()
 }
+
