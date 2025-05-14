@@ -9,9 +9,16 @@ import SwiftUI
 
 struct ContentView: View {
     var body: some View {
-        Image(systemName: "pencil.circle")
-            .foregroundStyle(.red)
-            .font(.largeTitle)
+        Button {
+            print("Button was tapped")
+        } label: {
+            VStack (alignment: .leading) {
+                Color.yellow
+                Text("Hello, world!")
+                Text("This is another text view")
+            }
+            .background(.red)
+        }
     }
 
     func executeDelete () {
