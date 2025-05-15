@@ -11,8 +11,11 @@ struct ContentView: View {
     @State private var countries = ["Estonia", "France", "Germany", "Ireland", "Italy", "Nigeria", "Poland", "Spain", "UK", "Russia", "US"].shuffled()
     @State private var correctAnswer = Int.random(in: 0...2)
     
-    @State private var showingScore = false
-    @State private var scoreTitle = ""
+    @State private var showingScore = false //отображение алерта после каждого ответа
+    @State private var showingEndRound = false //отображение алерта после окончания раунда
+    @State private var scoreTitle = ""      //заголовок алерта
+    @State private var score = 0            //счет
+    @State private var round = 1            //номер раунда
     
     var body: some View {
         ZStack {
@@ -28,6 +31,7 @@ struct ContentView: View {
                 Text("Угадай флаг")
                     .font(.largeTitle.weight(.bold))
                     .foregroundStyle(.white)
+                
                 VStack (spacing: 15) {
                     VStack {
                         Text("Нажмите на флаг")
@@ -55,32 +59,62 @@ struct ContentView: View {
                 
                 Spacer()
                 Spacer()
+
+                Text("Ваш счет: \(score)")
+                    .foregroundStyle(.white)
+                    .font(.title.bold())
                 
-                Text("Ваш счет: ???")
+                Text("Раунд: \(round)")
                     .foregroundStyle(.white)
                     .font(.title.bold())
                 
                 Spacer()
             }
+            .alert(scoreTitle, isPresented: $showingScore) {
+                Button("Продолжить") {
+                    if round == 9  {
+                        score = 0
+                        round = 1
+                    }
+                    
+                    //askQuestion()
+                }
+            } message: {
+            Text("Ваш счет: \(score)")
+            }
             .padding()
         }
-        .alert(scoreTitle, isPresented: $showingScore) {
-            Button("Продолжить", action: askQuestion)
+        
+        .alert("Игра окончена", isPresented: $showingEndRound) {
+            Button("Следующий раунд") {
+                    score = 0
+                    round = 1
+            }
         } message: {
-        Text("Ваш счет: ХХХ")
+        Text("Ваш счет: \(score)")
         }
+
     }
 
     //событие тапа на флаг
     func flagTapped (_ number: Int) {
         if number == correctAnswer {
-            scoreTitle = "Верно"
+            //scoreTitle = "Верно"
+            score += 1
         } else {
-            scoreTitle = "Не верно"
+            scoreTitle = "Не правильно! Это флаг \(countries[number])"
+            score -= 1
+            showingScore = true
+            
         }
+        round += 1
         
         //показать алерт
-        showingScore = true
+        if round == 9 {
+            showingEndRound = true
+        }
+        
+        askQuestion()
     }
     
     //новый раунд
