@@ -17,12 +17,19 @@ struct ContentView: View {
     @State private var score = 0            //счет
     @State private var round = 1            //номер раунда
     
+    @State private var rotationAmount = [0.0, 0.0, 0.0]     //угол поворота флагов
+    @State private var opacityValues = [1.0, 1.0, 1.0]      //непрозрачность флагов
+    @State private var scaleValues = [1.0, 1.0, 1.0]        //коэффициент размера флагов
+    @State private var isDisabled = false                   //недоступность флагов (включим на время анимации)
+    
     struct FlagImage: View {
         let imageName: String
+        let opacity: Double
         var body: some View {
             Image(imageName)
                 .clipShape(.capsule)
                 .shadow(radius: 5)
+                .opacity(opacity)
         }
     }
     
@@ -48,14 +55,19 @@ struct ContentView: View {
                             .font(.subheadline.weight(.heavy))
                         
                         Text(countries[correctAnswer])
-                            //.foregroundStyle(.white)
                             .font(.largeTitle.weight(.semibold))
                     }
-                    ForEach(0..<3) { number in
-                        Button {
-                            flagTapped(number)
-                        } label: {
-                            FlagImage(imageName: countries[number])
+                    ForEach(0..<min(3, countries.count), id: \.self) { number in
+                        // Проверка, что индекс существует
+                        if countries.indices.contains(number) {
+                            Button {
+                                flagTapped(number)
+                            } label: {
+                                FlagImage(imageName: countries[number], opacity: opacityValues[number])
+                                    .scaleEffect(scaleValues[number])   //добавляем эффект масштабирования
+                            }
+                            .rotation3DEffect(.degrees(rotationAmount[number]), axis: (x: 0, y: 1, z: 0))
+                            .disabled(isDisabled)
                         }
                     }
                 }
@@ -83,8 +95,6 @@ struct ContentView: View {
                         score = 0
                         round = 1
                     }
-                    
-                    //askQuestion()
                 }
             } message: {
             Text("Ваш счет: \(score)")
@@ -105,29 +115,63 @@ struct ContentView: View {
 
     //событие тапа на флаг
     func flagTapped (_ number: Int) {
+        //Блокируем все кнопки
+        isDisabled = true
+        
+        //Устанавливаем прозрачность для неактивных флагов
+        for i in 0..<3 {
+            opacityValues[i] = i == number ? 1.0 : 0.25
+            scaleValues[i] = i == number ? 1.0 : 0.75
+        }
+        
+        //запускаем анимации выбранного флага
+        withAnimation {
+             rotationAmount[number] += 360
+            withAnimation(.easeInOut(duration: 0.5)) {
+                scaleValues[number] = 1.0
+            }
+        }
+        
+        //запускаем алерт на 2 секунды
+        Timer.scheduledTimer(withTimeInterval: 2.0, repeats: false) { _ in
+
         if number == correctAnswer {
-            //scoreTitle = "Верно"
             score += 1
         } else {
-            scoreTitle = "Не правильно! Это флаг \(countries[number])"
+            scoreTitle = "Не правильно! Вы выбрали флаг \(countries[number]), а надо было выбрать \(countries[correctAnswer]) "
             score -= 1
             showingScore = true
             
         }
         round += 1
         
-        //показать алерт
-        if round == 9 {
-            showingEndRound = true
+            if round == 9 {
+                showingEndRound = true
+            }
+            
+            //сбрасываем состояния флагов
+            resetFlags()
+            
+            askQuestion()
         }
-        
-        askQuestion()
+    }
+    
+    func resetFlags() {
+        opacityValues = [1.0, 1.0, 1.0]
+        scaleValues = [1.0, 1.0, 1.0]
+        isDisabled = false
     }
     
     //новый раунд
     func askQuestion() {
+        guard countries.count >= 3 else {
+            fatalError("Недостаточно стран в массиве")
+        }
+
         countries.shuffle()
         correctAnswer = Int.random(in: 0...2)
+        print("Текущие флаги: \(countries.prefix(3))")
+        print("Правильный ответ: \(countries[correctAnswer])")
     }
 }
 
