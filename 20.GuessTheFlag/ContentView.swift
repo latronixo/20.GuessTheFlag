@@ -103,7 +103,7 @@ struct ContentView: View {
         }
         
         .alert("Игра окончена", isPresented: $showingEndRound) {
-            Button("Следующий раунд") {
+            Button("Начать заново") {
                     score = 0
                     round = 1
             }
